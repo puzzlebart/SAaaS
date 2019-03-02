@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded b
 // app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
 // const APIS = JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
-const getAPIS = ()=> JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
+const getAPIS = () => JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
 
 
 
@@ -32,7 +32,7 @@ app.use(function (req, res, next) {
 
 // MICKEY MOUSE ENTERPRISE-GRADE SECURITY AS A SERVICE
 const superSecretApiKeys = process.env.APIKEYS.split(",")
-const doEnterpriseLevelSecurityCheck = true;
+const doEnterpriseLevelSecurityCheck = false;
 // ENTERPRISE GRADE RANDOMIZATION ENGINE
 const randomize = (min, max) => Math.round((Math.random() * (max - min) + min))
 
@@ -142,7 +142,9 @@ app.get('/', (req, res) => { res.render("index") });
 // SHITTY API ENDPOINT TRIGGER 
 app.get([...getAPIS().map(a => `/${a.name}`)], (req, res) => {
     EnterpriseLevelSecurityCheck(req, res)
-        .then(passed => { passed ? executeAPI(req, res) : res.render("error") })
+        .then(passed => {
+            passed ? executeAPI(req, res) : res.render("error")
+        })
 })
 
 // error route
