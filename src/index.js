@@ -15,7 +15,8 @@ app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded b
 // app.use(express.static(__dirname + '/public')); // because paths is a PITA
 // app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
-const APIS = JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
+// const APIS = JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
+const getAPIS = ()=> JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
 
 
 
@@ -42,13 +43,13 @@ app.get('/doh', (req, res) => { res.json({ message: "D'oh!" }) }) // DaaS - D´o
 
 // GET a named API by title or whatever
 app.get('/get', (req, res) => {
-    if (!req.query.name) { res.json(APIS) } // yeah so no query, you get all, you fool! use /LIST
+    if (!req.query.name) { res.json(getAPIS()) } // yeah so no query, you get all, you fool! use /LIST
 }) // D'oh!
 
 
 
 // list all created apis
-app.get("/list", (req, res) => res.json(APIS))
+app.get("/list", (req, res) => res.json(getAPIS()))
 app.get("/success", (req, res) => res.render("success")) // newform
 app.get(["/new", "/create"], (req, res) => res.render("new")) // newform
 // postbacks go here. it's so damn secure
@@ -71,7 +72,7 @@ app.post(["/new", "/create"], (req, res) => {
 async function executeAPI(req, res) {
     console.log(`EXECUTEAPI ${req.url.substring(1)}`)
     let apiName = req.url.substring(1).trim();
-    let shittyApiDefinition = APIS.filter(a => a.name === apiName)[0] // we already know it exists 'cause we checked right
+    let shittyApiDefinition = getAPIS().filter(a => a.name === apiName)[0] // we already know it exists 'cause we checked right
     console.log(`THIS IS THE SHITTY API DEFINITION T.I.H.I.`)
     console.log(JSON.stringify(shittyApiDefinition))
     const url = shittyApiDefinition.url;
@@ -102,7 +103,7 @@ let search = app.get(["/search", "/find"], (req, res) => {
         if (!q) res.json({ error: "no query specified. use ?q=[querystring]" })
         if (q.length < 1) { res.json({ message: "type at least two characters to search" }) } else {
             q = decodeURIComponent(q.toLowerCase());
-            let matches = APIS.filter(api => {
+            let matches = getAPIS().filter(api => {
                 let name = api.name ? api.name.toLowerCase() : "";
                 return name.indexOf(q) > -1
             })
@@ -139,7 +140,7 @@ app.get("/501", (req, res) => { res.status(501); res.render("error") })
 app.get('/', (req, res) => { res.render("index") });
 
 // SHITTY API ENDPOINT TRIGGER 
-app.get([...APIS.map(a => `/${a.name}`)], (req, res) => {
+app.get([...getAPIS().map(a => `/${a.name}`)], (req, res) => {
     EnterpriseLevelSecurityCheck(req, res)
         .then(passed => { passed ? executeAPI(req, res) : res.render("error") })
 })

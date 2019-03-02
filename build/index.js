@@ -44,8 +44,12 @@ app.use(_bodyParser.default.urlencoded({
 // app.use(express.static(__dirname + '/public')); // because paths is a PITA
 // app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
+// const APIS = JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
 
-var APIS = JSON.parse(_fs.default.readFileSync("./build/apis.json", "utf8")); //CORS
+var getAPIS = function getAPIS() {
+  return JSON.parse(_fs.default.readFileSync("./build/apis.json", "utf8"));
+}; //CORS
+
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // Remember to have apikey here, else our enterprise-grade authorization-system will fail
@@ -80,14 +84,14 @@ app.get('/doh', function (req, res) {
 
 app.get('/get', function (req, res) {
   if (!req.query.name) {
-    res.json(APIS);
+    res.json(getAPIS());
   } // yeah so no query, you get all, you fool! use /LIST
 
 }); // D'oh!
 // list all created apis
 
 app.get("/list", function (req, res) {
-  return res.json(APIS);
+  return res.json(getAPIS());
 });
 app.get("/success", function (req, res) {
   return res.render("success");
@@ -131,7 +135,7 @@ function _executeAPI() {
           case 0:
             console.log("EXECUTEAPI ".concat(req.url.substring(1)));
             apiName = req.url.substring(1).trim();
-            shittyApiDefinition = APIS.filter(function (a) {
+            shittyApiDefinition = getAPIS().filter(function (a) {
               return a.name === apiName;
             })[0]; // we already know it exists 'cause we checked right
 
@@ -187,7 +191,7 @@ var search = app.get(["/search", "/find"], function (req, res) {
       });
     } else {
       q = decodeURIComponent(q.toLowerCase());
-      var matches = APIS.filter(function (api) {
+      var matches = getAPIS().filter(function (api) {
         var name = api.name ? api.name.toLowerCase() : "";
         return name.indexOf(q) > -1;
       });
@@ -240,7 +244,7 @@ app.get('/', function (req, res) {
   res.render("index");
 }); // SHITTY API ENDPOINT TRIGGER 
 
-app.get(_toConsumableArray(APIS.map(function (a) {
+app.get(_toConsumableArray(getAPIS().map(function (a) {
   return "/".concat(a.name);
 })), function (req, res) {
   EnterpriseLevelSecurityCheck(req, res).then(function (passed) {
