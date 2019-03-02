@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Shitty APIs as a Service",
   "engines": {
-    "node": "8.12.0"
+    "node": "^8.12.0",
+    "npm": "^6.4.1"
   },
   "scripts": {
     "clean": "rm -rf build && mkdir build",
