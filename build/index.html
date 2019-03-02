@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+    <html>
+
+    <head>
+        <title>Shitty APIs as a Service</title>
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
+            rel="stylesheet">
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:creator" content="@Kimzter">
+        <meta name="og:title" content="Shitty APIs as a Service">
+        <script src="//code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
+    </head>
+    
+    <body>
+        <div class="container">
+            <div class="hero-unit">
+                <h1>SAaaS</h1>
+                <h2>Shitty APIs as a Service</h2>
+                <p><em>v1.0.0</em></p>
+            </div>
+        </div>
+        <div class="container">
+            <div class="content" style="margin-left:50px;">
+                <h2 id="introduction">Introduction</h2>
+                <p>SAaaS (Shitty APIs as a Service) is a minimalist, opinionated, expressive, scalable API-engine, which enables power users to easily create their own APIS, with only basic html and css-knowledge.</p>
+                <h2 id="api">Create your own API</h2>
+                <h4>go to <a href="http://saaas.puzzlebart.no/create">http://saaas.puzzlebart.no/create</a></h4>
+                <table class="table" id="ops">
+                    <tr>
+                        <th>Path</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td>/version</td>
+                        <td>Returns the current SAaaS version number.</td>
+                    </tr>
+                    <tr>
+                        <td>/create</td>
+                        <td>WYSIWYG Shitty API-creator</td>
+                    </tr>
+                    <tr>
+                        <td>/new</td>
+                        <td>Create a new Shitty API using the SAaaS API</td>
+                    </tr>
+                    <tr>
+                        <td>/get</td>
+                        <td>Get a Shitty API</td>
+                    </tr>
+                    <tr>
+                        <td>/list</td>
+                        <td>list all Shitty APIs</td>
+                    </tr>
+                    
+                    <tr>
+                        <td>/doh</td>
+                        <td>D'oh! As A Service</td>
+                    </tr>
+                </table>
+                <h3 id="operations">Syntax</h3>
+                <p><b>fetch</b></p>
+                <code>await fetch("http://SAaaS.puzzlebart.no/new",{method:"POST",headers:{apikey:"YOUR_API_KEY"},body{YOUR_API_DEFINITION}}).then(d=>d.json().then(r=>r))</code>
+                <br/>
+                <br/>
+                <p><b>cURL</b></p>
+                <code>It's 03:30, way too late to write cURL script. fuck it</code>
+                <p></p>
+                <h3 id="operations">Example usage</h3>
+                <p>TODO</p>
+                <p><a href="https://github.com/puzzlebart/SAaaS">Fork us on github!</a></p>
+                <p>Created by <a href="https://twitter.com/Kimzter">@Kimzter</a></p>
+            </div>
+        </div>
+    </body>
+    </html>

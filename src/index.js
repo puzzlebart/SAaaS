@@ -1,5 +1,7 @@
 // @ts-ignore
+import APIS from "./apis.json";
 import express from 'express'; // framework, yo
+import cheerio from 'cheerio';
 if (process.platform === "darwin") { require("dotenv").config() } // enterprise-grade MacOS-detection
 const app = express() // express app instance
 
@@ -22,40 +24,47 @@ const doEnterpriseLevelSecurityCheck = true;
 const randomize = (min, max) => Math.round((Math.random() * (max - min) + min))
 
 // TIHIaaS -  Thanks, I hate it as a Service
-let tihi = app.get('/tihi', (req, res) => { res.redirect("https://www.youtube.com/watch?v=-Lez_WdX7Oc") })
+app.get('/tihi', (req, res) => { res.redirect("https://www.youtube.com/watch?v=-Lez_WdX7Oc") })
 
 // version
-let version = app.get("/version", (req, res) => { res.json({ version: "1.0.0" }) })
+app.get("/version", (req, res) => { res.json({ version: "1.0.0" }) })
 
 // DaaS - D´oh! as a Service
-let doh = app.get('/doh', (req, res) => { res.json({ message: "D'oh!" }) }) // D'oh!
+app.get('/doh', (req, res) => { res.json({ message: "D'oh!" }) }) // D'oh!
 
-let quotes = app.get('/quotes', (req, res) => {
-    EnterpriseLevelSecurityCheck(req, res).then(passed => { // VERY IMPORTANT SECURITY STUUFF
-        let charsWithQuotes = SaaSData.filter(char => char.Quotes.length >= 1)
-        const getRandomChar = () => charsWithQuotes[randomize(0, charsWithQuotes.length - 1)]
-        const getRandomQuote = (char) => char.Quotes.length === 1 ? char.Quotes[0] : char.Quotes[randomize(0, char.Quotes.length - 1)];
-        const getRandomQuoteObject = () => {
-            let rChar = getRandomChar()
-            let rQuote = getRandomQuote(rChar)
-            return { Quote: rQuote, Name: rChar.Name, Picture: rChar.Picture }
-        }
-        if (!req.query.amount) {
-            console.log("getting random quote")
-            // sensible - random by default
-            // God this is so horrible
-            res.json(getRandomQuoteObject())
-        } if (req.query.amount) {
-            if (isNaN(parseInt(req.query.amount))) { res.json({ error: "YOU HAVE TO SPECIFY A NUMBER AS AMOUNT, DOOFUS" }) }
-            let chars = []
-            for (let i = 0; i < req.query.amount; i++) { chars.push(getRandomQuoteObject()) }
-            res.json(chars)
-        }
-        else {
-            console.log(req.query)
-        }
-    })
+app.get('/get', (req, res) => {
+
+}) // D'oh!
+
+
+// list all created apis
+let list = app.get("/list", (req, res) => {
+    res.json(APIS)
 })
+
+
+//Do lol stuff here with cheerio
+function executeAPI(req, res, api) {
+    let apiName = req.url.substring(1);
+    let shittyApi = APIS.filter(a=>a.name===apiName) // we already know it exists 'cause we checked right
+    const url = shittyApi.url;
+    const getData = async url => {
+        try {
+            console.log(`trying to fetch ${shittyApi.url}`)
+            const response = await axios.get(url);
+            const data = response.data;
+            console.log(data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    let data = getData(url);
+    if(data)
+    res.send(data)
+}
+
+
+
 
 // SEARCH FUNCTION YEAOIAUSODIUASDOIS
 let search = app.get(["/search", "/find"], (req, res) => {
@@ -73,37 +82,6 @@ let search = app.get(["/search", "/find"], (req, res) => {
         }
     })
 })
-
-// character route
-let character = app.get(["/characters", "/api/characters", "/chars", "/characters/random"], (req, res) => {
-    console.log(`APIKEY: ${JSON.stringify(req.headers.apikey) || "none"}`)
-    EnterpriseLevelSecurityCheck(req, res).then(passed => {
-        if (!passed) return;
-        let search = req.query;
-        if (req.url.indexOf("/random") > -1) {
-            const getRandomCharacter = () => SaaSData[randomize(0, SaaSData.length)];
-            //return random character
-            if (req.query.amount) {
-                if (isNaN(parseInt(req.query.amount))) { res.json({ error: "YOU HAVE TO SPECIFY A NUMBER AS AMOUNT, DOOFUS" }) }
-                let randomChars = []
-                for (let i = 0; i < req.query.amount; i++) { randomChars.push(getRandomCharacter()) }
-                res.json(randomChars)
-            }
-            res.json(SaaSData[randomize(0, SaaSData.length)])
-        }
-        console.log(`queryprop: ${Object.keys(search)[0]}`)
-        if (!Object.keys(search)[0]) { res.send(`<h1>SaaS character-endpoint. Retrieve a character using ?name=[charactername] or ?id=[characterId] </h1>`) } else {
-            let queryProp = capitalize(Object.keys(search)[0])
-            let queryText = decodeURIComponent(search[queryProp])
-            let charResults = SaaSData.filter(char => { if (!char[queryProp]) { return false; } return char[queryProp] == queryText })
-            if (charResults.length) { res.json([...charResults]) }
-            else {
-                res.send(`No character with ${queryProp} ${queryText} in the SaaS-database`)
-            }
-        }
-    });
-})
-
 
 // ENTERPRISE LEVEL SECURITY ENGINE AUTOMATRON - DO NOT TOUCH IT'S PERFECT THANKS
 function EnterpriseLevelSecurityCheck(req, res) {
@@ -206,9 +184,19 @@ app.get('/', (req, res) => {
 `)
 });
 
+function matchesAnAPI(apiName) {
+    console.log(`checking whether the "${apiName}" api exists`)
+    let matches = APIS.filter(a => a.name === apiName).length == 1
+    console.log(`api-match: ${matches}`)
+    return matches
+}
+
 // error route
 app.get('(/*)?', (req, res) => {
-    res.send(`
+    if (matchesAnAPI(req.url.substring(1))) {
+        executeAPI(req, res)
+    } else {
+        res.send(`
 <html>
 <head>
     <title>Simpsons as a Service</title>
@@ -226,6 +214,7 @@ app.get('(/*)?', (req, res) => {
     </div>
     <center><a href="/">saas.puzzlebart.no</a>
     </body></html>`)
+    }
 }) // D'oh!
 
 app.listen(process.env.PORT || '3000', () => console.log(`running on port ${process.env.PORT || '3000'}`))
