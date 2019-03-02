@@ -6,9 +6,9 @@
     "clean": "rm -rf build && mkdir build",
     "build-babel": "babel -d ./build ./src -s",
     "build": "npm run clean && npm run build-babel",
-    "dev": "npm run build-babel && nodemon --exec node ./build/index.js",
+    "dev": "watch 'npm run build-babel && node ./build/index.js' ./src",
     "start": "node ./build/index.js",
-    "watch": "watch 'npm run build-babel' ./src && node ./build/index.js"
+    "watch": "watch 'npm run build-babel' ./src"
   },
   "keywords": [
     "ACDC2019",
@@ -22,6 +22,7 @@
     "axios": "^0.18.0",
     "cheerio": "^1.0.0-rc.2",
     "dotenv": "^6.2.0",
+    "ejs": "^2.6.1",
     "express": "^4.16.4",
     "watch": "^1.0.2"
   },

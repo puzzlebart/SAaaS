@@ -4,6 +4,7 @@ import express from 'express'; // framework, yo
 import cheerio from 'cheerio';
 if (process.platform === "darwin") { require("dotenv").config() } // enterprise-grade MacOS-detection
 const app = express() // express app instance
+app.set('view engine', 'ejs')
 
 
 
@@ -23,14 +24,10 @@ const doEnterpriseLevelSecurityCheck = true;
 // ENTERPRISE GRADE RANDOMIZATION ENGINE
 const randomize = (min, max) => Math.round((Math.random() * (max - min) + min))
 
-// TIHIaaS -  Thanks, I hate it as a Service
-app.get('/tihi', (req, res) => { res.redirect("https://www.youtube.com/watch?v=-Lez_WdX7Oc") })
+app.get('/tihi', (req, res) => { res.redirect("https://www.youtube.com/watch?v=-Lez_WdX7Oc") })// TIHIaaS -  Thanks, I hate it as a Service
+app.get("/version", (req, res) => { res.json({ version: "1.0.0" }) })// version
+app.get('/doh', (req, res) => { res.json({ message: "D'oh!" }) }) // DaaS - D´oh! as a Service
 
-// version
-app.get("/version", (req, res) => { res.json({ version: "1.0.0" }) })
-
-// DaaS - D´oh! as a Service
-app.get('/doh', (req, res) => { res.json({ message: "D'oh!" }) }) // D'oh!
 
 app.get('/get', (req, res) => {
 
@@ -46,7 +43,7 @@ let list = app.get("/list", (req, res) => {
 //Do lol stuff here with cheerio
 function executeAPI(req, res, api) {
     let apiName = req.url.substring(1);
-    let shittyApi = APIS.filter(a=>a.name===apiName) // we already know it exists 'cause we checked right
+    let shittyApi = APIS.filter(a => a.name === apiName) // we already know it exists 'cause we checked right
     const url = shittyApi.url;
     const getData = async url => {
         try {
@@ -59,11 +56,9 @@ function executeAPI(req, res, api) {
         }
     };
     let data = getData(url);
-    if(data)
-    res.send(data)
+    if (data)
+        res.send(data)
 }
-
-
 
 
 // SEARCH FUNCTION YEAOIAUSODIUASDOIS
@@ -71,14 +66,13 @@ let search = app.get(["/search", "/find"], (req, res) => {
     EnterpriseLevelSecurityCheck(req, res).then(passed => {
         let q = req.query.q;
         if (!q) res.json({ error: "no query specified. use ?q=[querystring]" })
-        if (q.length < 3) { res.json({ message: "type at least three characters to search" }) } else {
+        if (q.length < 1) { res.json({ message: "type at least two characters to search" }) } else {
             q = decodeURIComponent(q.toLowerCase());
-            let matches = SaaSData.filter(char => {
-                let name = char.Name ? char.Name.toLowerCase() : "";
-                let occupation = char.Occupation ? char.Occupation.toLowerCase() : "";
-                return name.indexOf(q) > -1 || occupation.indexOf(q) > -1
+            let matches = APIS.filter(api => {
+                let name = api.name ? api.name.toLowerCase() : "";
+                return name.indexOf(q) > -1
             })
-            res.json(matches)
+            res.json(matches.length ? matches : { message: "no shitty API matches :'-(" })
         }
     })
 })
@@ -106,83 +100,7 @@ const capitalize = (s) => { if (typeof s !== 'string') return ''; return s.charA
 
 
 // FRONT PAGE
-app.get('/', (req, res) => {
-    res.send(`<!DOCTYPE html>
-    <html>
-
-    <head>
-        <title>Shitty APIs as a Service</title>
-        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css"
-            rel="stylesheet">
-        <meta name="twitter:card" content="summary">
-        <meta name="twitter:creator" content="@Kimzter">
-        <meta name="og:title" content="Shitty APIs as a Service">
-        <script src="//code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
-    </head>
-    
-    <body>
-        <div class="container">
-            <div class="hero-unit">
-                <h1>SAaaS</h1>
-                <h2>Shitty APIs as a Service</h2>
-                <p><em>v1.0.0</em></p>
-            </div>
-        </div>
-        <div class="container">
-            <div class="content" style="margin-left:50px;">
-                <h2 id="introduction">Introduction</h2>
-                <p>SAaaS (Shitty APIs as a Service) is a minimalist, opinionated, expressive, scalable API-engine, which enables power users to easily create their own APIS, with only basic html and css-knowledge.</p>
-                <h2 id="api">Create your own API</h2>
-                <h4>go to <a href="http://saaas.puzzlebart.no/create">http://saaas.puzzlebart.no/create</a></h4>
-                <table class="table" id="ops">
-                    <tr>
-                        <th>Path</th>
-                        <th>Description</th>
-                    </tr>
-                    <tr>
-                        <td>/version</td>
-                        <td>Returns the current SAaaS version number.</td>
-                    </tr>
-                    <tr>
-                        <td>/create</td>
-                        <td>WYSIWYG Shitty API-creator</td>
-                    </tr>
-                    <tr>
-                        <td>/new</td>
-                        <td>Create a new Shitty API using the SAaaS API</td>
-                    </tr>
-                    <tr>
-                        <td>/get</td>
-                        <td>Get a Shitty API</td>
-                    </tr>
-                    <tr>
-                        <td>/list</td>
-                        <td>list all Shitty APIs</td>
-                    </tr>
-                    
-                    <tr>
-                        <td>/doh</td>
-                        <td>D'oh! As A Service</td>
-                    </tr>
-                </table>
-                <h3 id="operations">Syntax</h3>
-                <p><b>fetch</b></p>
-                <code>await fetch("http://SAaaS.puzzlebart.no/new",{method:"POST",headers:{apikey:"YOUR_API_KEY"},body{YOUR_API_DEFINITION}}).then(d=>d.json().then(r=>r))</code>
-                <br/>
-                <br/>
-                <p><b>cURL</b></p>
-                <code>It's 03:30, way too late to write cURL script. fuck it</code>
-                <p></p>
-                <h3 id="operations">Example usage</h3>
-                <p>TODO</p>
-                <p><a href="https://github.com/puzzlebart/SAaaS">Fork us on github!</a></p>
-                <p>Created by <a href="https://twitter.com/Kimzter">@Kimzter</a></p>
-            </div>
-        </div>
-    </body>
-    </html>
-`)
-});
+app.get('/', (req, res) => { res.render("index") });
 
 function matchesAnAPI(apiName) {
     console.log(`checking whether the "${apiName}" api exists`)
