@@ -164,7 +164,7 @@ function _executeAPI() {
                 }, _callee);
               }));
 
-              return function (_x4) {
+              return function (_x3) {
                 return _ref.apply(this, arguments);
               };
             }())[0];
@@ -294,76 +294,30 @@ app.get(_toConsumableArray(getAPIS().map(function (a) {
   // })
 });
 
-function matchesAPI(_x3) {
-  return _matchesAPI.apply(this, arguments);
-} // error route
+function matchesAPI(req) {
+  return new Promise(function (resolve, reject) {
+    var allShittyApiNames = getAPIS().map(function (a) {
+      return "/".concat(a.name);
+    });
+    var apiName = req.url.substring(1).trim();
 
+    if (apiName.indexOf("?")) {
+      apiName = apiName.substring(0, apiName.indexOf("?"));
+    }
 
-function _matchesAPI() {
-  _matchesAPI = _asyncToGenerator(
-  /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee4(req) {
-    var allShittyApiNames, apiName, matches;
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            allShittyApiNames = getAPIS().map(function (a) {
-              return "/".concat(a.name);
-            });
-            apiName = req.url.substring(1).trim();
-
-            if (apiName.indexOf("?")) {
-              apiName = apiName.substring(0, apiName.indexOf("?"));
-            }
-
-            _context4.next = 5;
-            return allShittyApiNames.filter(
-            /*#__PURE__*/
-            function () {
-              var _ref2 = _asyncToGenerator(
-              /*#__PURE__*/
-              regeneratorRuntime.mark(function _callee3(a) {
-                return regeneratorRuntime.wrap(function _callee3$(_context3) {
-                  while (1) {
-                    switch (_context3.prev = _context3.next) {
-                      case 0:
-                        return _context3.abrupt("return", a.name === apiName);
-
-                      case 1:
-                      case "end":
-                        return _context3.stop();
-                    }
-                  }
-                }, _callee3);
-              }));
-
-              return function (_x5) {
-                return _ref2.apply(this, arguments);
-              };
-            }()).length;
-
-          case 5:
-            _context4.t0 = _context4.sent;
-            matches = _context4.t0 == 1;
-            console.log("api-match: ".concat(matches));
-            return _context4.abrupt("return", matches);
-
-          case 9:
-          case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4);
-  }));
-  return _matchesAPI.apply(this, arguments);
+    var matches = allShittyApiNames.filter(function (a) {
+      return a.name === apiName;
+    }).length == 1;
+    console.log("api-match: ".concat(matches));
+    resolve(matches);
+  });
 }
 
-app.get('(/*)?', function (req, res) {
-  if (req.url = "/favicon.ico") {
-    return;
-  }
+app.get("/favicon.ico", function (req, res) {
+  res.end();
+}); // error route
 
+app.get('(/*)?', function (req, res) {
   matchesAPI(req).then(function (matches) {
     if (matches) {
       executeAPI(req, res);

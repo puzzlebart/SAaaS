@@ -157,18 +157,23 @@ app.get([...getAPIS().map(a => `/${a.name}`)], (req, res) => {
     // })
 })
 
-async function matchesAPI(req) {
-    let allShittyApiNames = getAPIS().map(a => `/${a.name}`)
-    let apiName = req.url.substring(1).trim();
-    if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) }
-    let matches = await allShittyApiNames.filter(async (a) => a.name === apiName).length == 1
-    console.log(`api-match: ${matches}`)
-    return matches
+function matchesAPI(req) {
+    return new Promise((resolve, reject) => {
+        let allShittyApiNames = getAPIS().map(a => `/${a.name}`)
+        let apiName = req.url.substring(1).trim();
+        if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) }
+        let matches = allShittyApiNames.filter((a) => a.name === apiName).length == 1;
+        console.log(`api-match: ${matches}`)
+        resolve(matches)
+    })
 }
+
+app.get("/favicon.ico", (req, res) => {
+    res.end()
+})
 
 // error route
 app.get('(/*)?', (req, res) => {
-    if (req.url = "/favicon.ico") { req.socket.end() }
     matchesAPI(req).then(matches => {
         if (matches) { executeAPI(req, res) } else {
             res.render(`error`)
