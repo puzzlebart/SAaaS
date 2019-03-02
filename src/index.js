@@ -193,7 +193,7 @@ app.get('/', (req, res) => {
                 <br/>
                 <br/>
                 <p><b>cURL</b></p>
-                <code>It's 02:40, way too late to write cURL script. fuck it</code>
+                <code>It's 03:30, way too late to write cURL script. fuck it</code>
                 <p></p>
                 <h3 id="operations">Example usage</h3>
                 <p>TODO</p>
