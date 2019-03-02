@@ -2,8 +2,6 @@
 
 var _express = _interopRequireDefault(require("express"));
 
-var _morgan = _interopRequireDefault(require("morgan"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -14,15 +12,13 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-// request logger
+// framework, yo
 if (process.platform === "darwin") {
   require("dotenv").config();
 } // enterprise-grade MacOS-detection
 
 
 var app = (0, _express.default)(); // express app instance
-
-app.use((0, _morgan.default)('tiny')); // morgan
 //CORS
 
 app.use(function (req, res, next) {

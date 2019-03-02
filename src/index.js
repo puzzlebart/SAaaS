@@ -1,9 +1,7 @@
 // @ts-ignore
 import express from 'express'; // framework, yo
-import morgan from 'morgan'; // request logger
 if (process.platform === "darwin") { require("dotenv").config() } // enterprise-grade MacOS-detection
 const app = express() // express app instance
-app.use(morgan('tiny')) // morgan
 
 
 
