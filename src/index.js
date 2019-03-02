@@ -1,7 +1,12 @@
 // @ts-ignore
 import APIS from "./apis.json";
+import "@babel/polyfill";
 import express from 'express'; // framework, yo
-import cheerio from 'cheerio';
+// import cheerio from 'cheerio'; // IM TRYING JSOM MOM
+import jsdom from "jsdom";
+const { JSDOM } = jsdom;
+
+import axios from "axios";
 if (process.platform === "darwin") { require("dotenv").config() } // enterprise-grade MacOS-detection
 const app = express() // express app instance
 app.set('view engine', 'ejs')
@@ -29,35 +34,38 @@ app.get("/version", (req, res) => { res.json({ version: "1.0.0" }) })// version
 app.get('/doh', (req, res) => { res.json({ message: "D'oh!" }) }) // DaaS - D´oh! as a Service
 
 
-app.get('/get', (req, res) => {
-
-}) // D'oh!
-
+// GET a named API by title or whatever
+app.get('/get', (req, res) => { res.status(501); res.render("error") }) // D'oh!
 
 // list all created apis
-let list = app.get("/list", (req, res) => {
-    res.json(APIS)
-})
+app.get("/list", (req, res) => res.json(APIS))
 
 
 //Do lol stuff here with cheerio
-function executeAPI(req, res, api) {
-    let apiName = req.url.substring(1);
-    let shittyApi = APIS.filter(a => a.name === apiName) // we already know it exists 'cause we checked right
-    const url = shittyApi.url;
-    const getData = async url => {
-        try {
-            console.log(`trying to fetch ${shittyApi.url}`)
-            const response = await axios.get(url);
-            const data = response.data;
-            console.log(data);
-        } catch (error) {
-            console.log(error);
+async function executeAPI(req, res) {
+    console.log(`EXECUTEAPI ${req.url.substring(1)}`)
+    let apiName = req.url.substring(1).trim();
+    let shittyApiDefinition = APIS.filter(a => a.name === apiName)[0] // we already know it exists 'cause we checked right
+    console.log(`THIS IS THE SHITTY API DEFINITION T.I.H.I.`)
+    console.log(JSON.stringify(shittyApiDefinition))
+    const url = shittyApiDefinition.url;
+    axios.get(url).then(r => {
+        const data = r.data
+        const dom = new JSDOM(data)
+        let document = dom.window.document; // ah it's so familiar
+
+        // THIS IS WHERE ALL THE SHITTY MAGIC HAPPENS
+
+        console.log(`SELECTORS: ${shittyApiDefinition.selectors}`)
+        let allTheThings = document.querySelectorAll(shittyApiDefinition.selectors);
+        if (allTheThings.length) {
+            let allTheShittyEntries = [...allTheThings].map(e => { return { entry: e.textContent.trim() } })
+            // console.log(allTheShittyEntries)
+            res.json(allTheShittyEntries)
+        } else {
+            res.json({ message: "no entries in your shitty api" })
         }
-    };
-    let data = getData(url);
-    if (data)
-        res.send(data)
+    })
 }
 
 
@@ -102,7 +110,7 @@ const capitalize = (s) => { if (typeof s !== 'string') return ''; return s.charA
 // FRONT PAGE
 app.get('/', (req, res) => { res.render("index") });
 
-function matchesAnAPI(apiName) {
+const matchesAnAPI = (apiName) => {
     console.log(`checking whether the "${apiName}" api exists`)
     let matches = APIS.filter(a => a.name === apiName).length == 1
     console.log(`api-match: ${matches}`)
@@ -110,29 +118,6 @@ function matchesAnAPI(apiName) {
 }
 
 // error route
-app.get('(/*)?', (req, res) => {
-    if (matchesAnAPI(req.url.substring(1))) {
-        executeAPI(req, res)
-    } else {
-        res.send(`
-<html>
-<head>
-    <title>Simpsons as a Service</title>
-    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
-    <meta name="og:title" content="Simpsons As A Service">
-    <script src="//code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
-</head>
-<body>
-    <div class="container">
-        <div class="hero-unit">
-            <h1>742 - D'oh!</h1>
-            <h2>This is not the shitty API you are looking for</h2>
-            <p><em>Shitty API as a Service v1.0.0</em></p>
-        </div>
-    </div>
-    <center><a href="/">saas.puzzlebart.no</a>
-    </body></html>`)
-    }
-}) // D'oh!
+app.get('(/*)?', (req, res) => matchesAnAPI(req.url.substring(1)) ? executeAPI(req, res) : res.render(`error`)) // D'oh!
 
 app.listen(process.env.PORT || '3000', () => console.log(`running on port ${process.env.PORT || '3000'}`))

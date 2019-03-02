@@ -2,5 +2,5 @@
     "name":"vg",
     "description":"Gets all headers from VG.no",
     "url":"https://vg.no",
-    "selectors":[".article-content"]
+    "selectors":".article-content"
 }]

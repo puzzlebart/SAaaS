@@ -18,12 +18,14 @@
   "author": "damsleth",
   "license": "ISC",
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "async": "^2.6.2",
     "axios": "^0.18.0",
     "cheerio": "^1.0.0-rc.2",
     "dotenv": "^6.2.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
+    "jsdom": "^13.2.0",
     "watch": "^1.0.2"
   },
   "devDependencies": {
