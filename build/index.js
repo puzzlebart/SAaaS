@@ -12,8 +12,6 @@ var _jsdom = _interopRequireDefault(require("jsdom"));
 
 var _axios = _interopRequireDefault(require("axios"));
 
-var _apis = _interopRequireDefault(require("./apis.json"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
@@ -47,7 +45,8 @@ app.use(_bodyParser.default.urlencoded({
 // app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
 
-//CORS
+var APIS = JSON.parse(_fs.default.readFileSync("./build/apis.json", "utf8")); //CORS
+
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // Remember to have apikey here, else our enterprise-grade authorization-system will fail
 
@@ -81,14 +80,14 @@ app.get('/doh', function (req, res) {
 
 app.get('/get', function (req, res) {
   if (!req.query.name) {
-    res.json(_apis.default);
+    res.json(APIS);
   } // yeah so no query, you get all, you fool! use /LIST
 
 }); // D'oh!
 // list all created apis
 
 app.get("/list", function (req, res) {
-  return res.json(_apis.default);
+  return res.json(APIS);
 });
 app.get("/success", function (req, res) {
   return res.render("success");
@@ -101,10 +100,7 @@ app.get(["/new", "/create"], function (req, res) {
 
 app.post(["/new", "/create"], function (req, res) {
   console.log(JSON.stringify(req.body));
-
-  var apiFile = _fs.default.readFileSync("./build/apis.json", "utf8");
-
-  var apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1);
+  var apiFileReadyForNewEntry = APIS.substring(0, APIS.length - 1);
 
   _fs.default.writeFile("./build/apis.json", "\n".concat(apiFileReadyForNewEntry, ",\n").concat(JSON.stringify(req.body), "]"), function (err, data) {
     // ITS FUCKING GLORIOUS
@@ -132,7 +128,7 @@ function _executeAPI() {
           case 0:
             console.log("EXECUTEAPI ".concat(req.url.substring(1)));
             apiName = req.url.substring(1).trim();
-            shittyApiDefinition = _apis.default.filter(function (a) {
+            shittyApiDefinition = APIS.filter(function (a) {
               return a.name === apiName;
             })[0]; // we already know it exists 'cause we checked right
 
@@ -188,12 +184,10 @@ var search = app.get(["/search", "/find"], function (req, res) {
       });
     } else {
       q = decodeURIComponent(q.toLowerCase());
-
-      var matches = _apis.default.filter(function (api) {
+      var matches = APIS.filter(function (api) {
         var name = api.name ? api.name.toLowerCase() : "";
         return name.indexOf(q) > -1;
       });
-
       res.json(matches.length ? matches : {
         message: "no shitty API matches :'-("
       });
@@ -243,7 +237,7 @@ app.get('/', function (req, res) {
   res.render("index");
 }); // SHITTY API ENDPOINT TRIGGER 
 
-app.get(_toConsumableArray(_apis.default.map(function (a) {
+app.get(_toConsumableArray(APIS.map(function (a) {
   return "/".concat(a.name);
 })), function (req, res) {
   EnterpriseLevelSecurityCheck(req, res).then(function (passed) {

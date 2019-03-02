@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded b
 // app.use(express.static(__dirname + '/public')); // because paths is a PITA
 // app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
-import APIS from "./apis.json";
+const APIS = JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
 
 
 
@@ -54,8 +54,7 @@ app.get(["/new", "/create"], (req, res) => res.render("new")) // newform
 // postbacks go here. it's so damn secure
 app.post(["/new", "/create"], (req, res) => {
     console.log(JSON.stringify(req.body))
-    let apiFile = fs.readFileSync("./build/apis.json", "utf8")
-    let apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1)
+    let apiFileReadyForNewEntry = APIS.substring(0, APIS.length - 1)
     fs.writeFile("./build/apis.json", `\n${apiFileReadyForNewEntry},\n${JSON.stringify(req.body)}]`, ((err, data) => { // ITS FUCKING GLORIOUS
         if (err) {
             res.render("error")
