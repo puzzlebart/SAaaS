@@ -1,0 +1,5 @@
+[{
+    "name":"vg",
+    "url":"https://vg.no",
+    "selectors":[".article-content"]
+}]
