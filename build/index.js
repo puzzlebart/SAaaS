@@ -1,9 +1,5 @@
 "use strict";
 
-var _apis = _interopRequireDefault(require("./apis.json"));
-
-var _apisSample = _interopRequireDefault(require("./apis.sample.json"));
-
 var _bodyParser = _interopRequireDefault(require("body-parser"));
 
 var _fs = _interopRequireDefault(require("fs"));
@@ -15,6 +11,8 @@ var _express = _interopRequireDefault(require("express"));
 var _jsdom = _interopRequireDefault(require("jsdom"));
 
 var _axios = _interopRequireDefault(require("axios"));
+
+var _apis = _interopRequireDefault(require("./apis.json"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -45,8 +43,12 @@ app.use(_bodyParser.default.json()); // to support JSON-encoded bodies
 app.use(_bodyParser.default.urlencoded({
   extended: true
 })); // to support URL-encoded bodies 
-//CORS
+// app.use(express.static(__dirname + '/public')); // because paths is a PITA
 
+app.use(_express.default.static("public")); // because paths is a PITA
+// @ts-ignore
+
+//CORS
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // Remember to have apikey here, else our enterprise-grade authorization-system will fail
 
@@ -101,7 +103,7 @@ app.get(["/new", "/create"], function (req, res) {
 app.post(["/new", "/create"], function (req, res) {
   console.log(JSON.stringify(req.body));
 
-  var apiFile = _fs.default.readFileSync("./apis.json", "utf8");
+  var apiFile = _fs.default.readFileSync("./build/apis.json", "utf8");
 
   var apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1);
 

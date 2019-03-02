@@ -1,7 +1,3 @@
-// @ts-ignore
-import APIS from "./apis.json";
-// @ts-ignore
-import sampleAPIS from "./apis.sample.json";
 import bodyParser from "body-parser";
 import fs from "fs";
 import "@babel/polyfill";
@@ -16,6 +12,10 @@ const app = express() // express app instance
 app.set('view engine', 'ejs')
 app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded bodies 
+// app.use(express.static(__dirname + '/public')); // because paths is a PITA
+app.use(express.static("public")); // because paths is a PITA
+// @ts-ignore
+import APIS from "./apis.json";
 
 
 
