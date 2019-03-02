@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded b
 // app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
 // const APIS = JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
-let getAPIS = () => JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
+const getAPIS = () => (fs.readFileSync("./build/apis.json", "utf8"))
 
 
 
@@ -43,13 +43,13 @@ app.get('/doh', (req, res) => { res.json({ message: "D'oh!" }) }) // DaaS - D´o
 
 // GET a named API by title or whatever
 app.get('/get', (req, res) => {
-    if (!req.query.name) { res.json(getAPIS()) } // yeah so no query, you get all, you fool! use /LIST
+    if (!req.query.name) { res.json(JSON.parse(getAPIS())) } // yeah so no query, you get all, you fool! use /LIST
 }) // D'oh!
 
 
 
 // list all created apis
-app.get("/list", (req, res) => res.json(getAPIS()))
+app.get("/list", (req, res) => res.json(JSON.parse(getAPIS())))
 app.get("/success", (req, res) => res.render("success")) // newform
 app.get(["/new", "/create"], (req, res) => res.render("new")) // newform
 // postbacks go here. it's so damn secure
@@ -71,11 +71,13 @@ app.post(["/new", "/create"], (req, res) => {
 //Do lol stuff here with cheerio
 async function executeAPI(req, res) {
     console.log(`----------- EXECUTEAPI ${req.url.substring(1)} -----------`)
-    let allShittyAPIs = getAPIS();
-    let apiName = req.url.substring(1).trim();
-    if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) } // HAHAHA SO BAD
+    let allShittyAPIs = JSON.parse(getAPIS());
+    let apiName = req.url.substring(1);
+    // if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) } // HAHAHA SO BAD
     console.log(`api definitions: ${JSON.stringify(allShittyAPIs)}`)
-    let shittyApiDefinition = await allShittyAPIs.filter(async (a) => a.name == apiName)[0]; // we already know it exists 'cause we checked right
+    let shittyApiDefinition = allShittyAPIs.filter((a) =>{
+        console.log(`testing ${a.name} equal to ${apiName}`)
+         return a.name == apiName})[0]; // we already know it exists 'cause we checked right
     console.log(`Found an api definition: ${JSON.stringify(shittyApiDefinition)}`)
     if (!shittyApiDefinition) {
         console.log("no shitty api definition...")
@@ -102,23 +104,6 @@ async function executeAPI(req, res) {
         }
     })
 }
-
-
-// SEARCH FUNCTION YEAOIAUSODIUASDOIS
-let search = app.get(["/search", "/find"], (req, res) => {
-    EnterpriseLevelSecurityCheck(req, res).then(passed => {
-        let q = req.query.q;
-        if (!q) res.json({ error: "no query specified. use ?q=[querystring]" })
-        if (q.length < 1) { res.json({ message: "type at least two characters to search" }) } else {
-            q = decodeURIComponent(q.toLowerCase());
-            let matches = getAPIS().filter(api => {
-                let name = api.name ? api.name.toLowerCase() : "";
-                return name.indexOf(q) > -1
-            })
-            res.json(matches.length ? matches : { message: "no shitty API matches :'-(" })
-        }
-    })
-})
 
 // ENTERPRISE LEVEL SECURITY ENGINE AUTOMATRON - DO NOT TOUCH IT'S PERFECT THANKS
 function EnterpriseLevelSecurityCheck(req, res) {
@@ -147,40 +132,22 @@ app.get("/501", (req, res) => { res.status(501); res.render("error") })
 // FRONT PAGE
 app.get('/', (req, res) => { res.render("index") });
 
-// SHITTY API ENDPOINT TRIGGER 
-app.get([...getAPIS().map(a => `/${a.name}`)], (req, res) => {
-    // EnterpriseLevelSecurityCheck(req, res)
-    //     .then(passed => {
-    //         passed ?
-    executeAPI(req, res)
-    //         : res.render("error")
-    // })
-})
-
-function matchesAPI(req,res) {
-    return new Promise((resolve, reject) => {
-        let allShittyApiNames = getAPIS().map(a => `/${a.name}`)
-        console.log(`AVAILABLE APIS: ${allShittyApiNames}`)
-        let apiName = req.url.substring(1).trim();
-        console.log(`TESTING FOR: ${apiName}`)
-        if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) }
-        let matches = allShittyApiNames.filter((a) => a.name === apiName).length>0;
-        console.log(`api-match: ${matches}`)
-        resolve(matches)
-    })
-}
-
 app.get("/favicon.ico", (req, res) => {
     res.end()
 })
 
 // error route
 app.get('(/*)?', (req, res) => {
-    matchesAPI(req,res).then(matches => {
-        if (matches) { executeAPI(req, res) } else {
-            res.render(`error`)
-        }
-    })
+    let allShittyApiNames = JSON.parse(getAPIS()).map(a => `${a.name}`)
+    let apiName = req.url.substring(1).trim();
+    console.log(`TESTING FOR: ${apiName}`)
+    console.log(`AVAILABLE APIS: ${allShittyApiNames}`)
+    if (apiName.indexOf("?") > -1) { apiName = apiName.substring(0, apiName.indexOf("?")) }
+    let matches = allShittyApiNames.filter(a => a.name == apiName);
+    if (matches) { executeAPI(req, res) } else {
+        console.log(`no match for ${apiName}`)
+        res.render(`error`)
+    }
 }) // D'oh!
 
 app.listen(process.env.PORT || '3000', () => console.log(`running on port ${process.env.PORT || '3000'}`))

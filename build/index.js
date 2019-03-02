@@ -47,7 +47,7 @@ app.use(_bodyParser.default.urlencoded({
 // const APIS = JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
 
 var getAPIS = function getAPIS() {
-  return JSON.parse(_fs.default.readFileSync("./build/apis.json", "utf8"));
+  return _fs.default.readFileSync("./build/apis.json", "utf8");
 }; //CORS
 
 
@@ -84,14 +84,14 @@ app.get('/doh', function (req, res) {
 
 app.get('/get', function (req, res) {
   if (!req.query.name) {
-    res.json(getAPIS());
+    res.json(JSON.parse(getAPIS()));
   } // yeah so no query, you get all, you fool! use /LIST
 
 }); // D'oh!
 // list all created apis
 
 app.get("/list", function (req, res) {
-  return res.json(getAPIS());
+  return res.json(JSON.parse(getAPIS()));
 });
 app.get("/success", function (req, res) {
   return res.render("success");
@@ -121,57 +121,28 @@ app.post(["/new", "/create"], function (req, res) {
 
 function executeAPI(_x, _x2) {
   return _executeAPI.apply(this, arguments);
-} // SEARCH FUNCTION YEAOIAUSODIUASDOIS
+} // ENTERPRISE LEVEL SECURITY ENGINE AUTOMATRON - DO NOT TOUCH IT'S PERFECT THANKS
 
 
 function _executeAPI() {
   _executeAPI = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee2(req, res) {
+  regeneratorRuntime.mark(function _callee(req, res) {
     var allShittyAPIs, apiName, shittyApiDefinition, url;
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    return regeneratorRuntime.wrap(function _callee$(_context) {
       while (1) {
-        switch (_context2.prev = _context2.next) {
+        switch (_context.prev = _context.next) {
           case 0:
             console.log("----------- EXECUTEAPI ".concat(req.url.substring(1), " -----------"));
-            allShittyAPIs = getAPIS();
-            apiName = req.url.substring(1).trim();
-
-            if (apiName.indexOf("?")) {
-              apiName = apiName.substring(0, apiName.indexOf("?"));
-            } // HAHAHA SO BAD
-
+            allShittyAPIs = JSON.parse(getAPIS());
+            apiName = req.url.substring(1); // if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) } // HAHAHA SO BAD
 
             console.log("api definitions: ".concat(JSON.stringify(allShittyAPIs)));
-            _context2.next = 7;
-            return allShittyAPIs.filter(
-            /*#__PURE__*/
-            function () {
-              var _ref = _asyncToGenerator(
-              /*#__PURE__*/
-              regeneratorRuntime.mark(function _callee(a) {
-                return regeneratorRuntime.wrap(function _callee$(_context) {
-                  while (1) {
-                    switch (_context.prev = _context.next) {
-                      case 0:
-                        return _context.abrupt("return", a.name == apiName);
+            shittyApiDefinition = allShittyAPIs.filter(function (a) {
+              console.log("testing ".concat(a.name, " equal to ").concat(apiName));
+              return a.name == apiName;
+            })[0]; // we already know it exists 'cause we checked right
 
-                      case 1:
-                      case "end":
-                        return _context.stop();
-                    }
-                  }
-                }, _callee);
-              }));
-
-              return function (_x3) {
-                return _ref.apply(this, arguments);
-              };
-            }())[0];
-
-          case 7:
-            shittyApiDefinition = _context2.sent;
-            // we already know it exists 'cause we checked right
             console.log("Found an api definition: ".concat(JSON.stringify(shittyApiDefinition)));
 
             if (!shittyApiDefinition) {
@@ -208,39 +179,15 @@ function _executeAPI() {
               }
             });
 
-          case 14:
+          case 11:
           case "end":
-            return _context2.stop();
+            return _context.stop();
         }
       }
-    }, _callee2);
+    }, _callee);
   }));
   return _executeAPI.apply(this, arguments);
 }
-
-var search = app.get(["/search", "/find"], function (req, res) {
-  EnterpriseLevelSecurityCheck(req, res).then(function (passed) {
-    var q = req.query.q;
-    if (!q) res.json({
-      error: "no query specified. use ?q=[querystring]"
-    });
-
-    if (q.length < 1) {
-      res.json({
-        message: "type at least two characters to search"
-      });
-    } else {
-      q = decodeURIComponent(q.toLowerCase());
-      var matches = getAPIS().filter(function (api) {
-        var name = api.name ? api.name.toLowerCase() : "";
-        return name.indexOf(q) > -1;
-      });
-      res.json(matches.length ? matches : {
-        message: "no shitty API matches :'-("
-      });
-    }
-  });
-}); // ENTERPRISE LEVEL SECURITY ENGINE AUTOMATRON - DO NOT TOUCH IT'S PERFECT THANKS
 
 function EnterpriseLevelSecurityCheck(req, res) {
   return new Promise(function (resolve, reject) {
@@ -282,49 +229,33 @@ app.get("/501", function (req, res) {
 
 app.get('/', function (req, res) {
   res.render("index");
-}); // SHITTY API ENDPOINT TRIGGER 
-
-app.get(_toConsumableArray(getAPIS().map(function (a) {
-  return "/".concat(a.name);
-})), function (req, res) {
-  // EnterpriseLevelSecurityCheck(req, res)
-  //     .then(passed => {
-  //         passed ?
-  executeAPI(req, res); //         : res.render("error")
-  // })
 });
-
-function matchesAPI(req) {
-  return new Promise(function (resolve, reject) {
-    var allShittyApiNames = getAPIS().map(function (a) {
-      return "/".concat(a.name);
-    });
-    var apiName = req.url.substring(1).trim();
-
-    if (apiName.indexOf("?")) {
-      apiName = apiName.substring(0, apiName.indexOf("?"));
-    }
-
-    var matches = allShittyApiNames.filter(function (a) {
-      return a.name === apiName;
-    }).length == 1;
-    console.log("api-match: ".concat(matches));
-    resolve(matches);
-  });
-}
-
 app.get("/favicon.ico", function (req, res) {
   res.end();
 }); // error route
 
 app.get('(/*)?', function (req, res) {
-  matchesAPI(req).then(function (matches) {
-    if (matches) {
-      executeAPI(req, res);
-    } else {
-      res.render("error");
-    }
+  var allShittyApiNames = JSON.parse(getAPIS()).map(function (a) {
+    return "".concat(a.name);
   });
+  var apiName = req.url.substring(1).trim();
+  console.log("TESTING FOR: ".concat(apiName));
+  console.log("AVAILABLE APIS: ".concat(allShittyApiNames));
+
+  if (apiName.indexOf("?") > -1) {
+    apiName = apiName.substring(0, apiName.indexOf("?"));
+  }
+
+  var matches = allShittyApiNames.filter(function (a) {
+    return a.name == apiName;
+  });
+
+  if (matches) {
+    executeAPI(req, res);
+  } else {
+    console.log("no match for ".concat(apiName));
+    res.render("error");
+  }
 }); // D'oh!
 
 app.listen(process.env.PORT || '3000', function () {
