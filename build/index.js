@@ -44,8 +44,7 @@ app.use(_bodyParser.default.urlencoded({
   extended: true
 })); // to support URL-encoded bodies 
 // app.use(express.static(__dirname + '/public')); // because paths is a PITA
-
-app.use(_express.default.static("public")); // because paths is a PITA
+// app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
 
 //CORS
@@ -107,7 +106,7 @@ app.post(["/new", "/create"], function (req, res) {
 
   var apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1);
 
-  _fs.default.writeFile("./apis.json", "\n".concat(apiFileReadyForNewEntry, ",\n").concat(JSON.stringify(req.body), "]"), function (err, data) {
+  _fs.default.writeFile("./build/apis.json", "\n".concat(apiFileReadyForNewEntry, ",\n").concat(JSON.stringify(req.body), "]"), function (err, data) {
     // ITS FUCKING GLORIOUS
     if (err) {
       res.render("error");

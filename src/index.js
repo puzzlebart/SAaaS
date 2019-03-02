@@ -13,9 +13,9 @@ app.set('view engine', 'ejs')
 app.use(bodyParser.json());       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded bodies 
 // app.use(express.static(__dirname + '/public')); // because paths is a PITA
-app.use(express.static("public")); // because paths is a PITA
+// app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
-import APIS from "./public/apis.json";
+import APIS from "./apis.json";
 
 
 
@@ -56,7 +56,7 @@ app.post(["/new", "/create"], (req, res) => {
     console.log(JSON.stringify(req.body))
     let apiFile = fs.readFileSync("./build/apis.json", "utf8")
     let apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1)
-    fs.writeFile("./apis.json", `\n${apiFileReadyForNewEntry},\n${JSON.stringify(req.body)}]`, ((err, data) => { // ITS FUCKING GLORIOUS
+    fs.writeFile("./build/apis.json", `\n${apiFileReadyForNewEntry},\n${JSON.stringify(req.body)}]`, ((err, data) => { // ITS FUCKING GLORIOUS
         if (err) {
             res.render("error")
         } else {
