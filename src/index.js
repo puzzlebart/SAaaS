@@ -55,13 +55,43 @@ app.get(["/new", "/create"], (req, res) => res.render("new")) // newform
 // postbacks go here. it's so damn secure
 app.post(["/new", "/create"], (req, res) => {
     console.log(JSON.stringify(req.body))
+    let apiname = req.body.name || "[YOUR_API_NAME]"
     let apiFile = fs.readFileSync("./build/apis.json", "utf8")
     let apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1)
     fs.writeFile("./build/apis.json", `\n${apiFileReadyForNewEntry},\n${JSON.stringify(req.body)}]`, ((err, data) => { // ITS FUCKING GLORIOUS
         if (err) {
             res.render("error")
         } else {
-            res.render("success");
+            res.send(`
+            <!DOCTYPE html>
+<html>
+
+<head>
+    <title>Shitty APIs as a Service</title>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:creator" content="@Kimzter">
+    <meta name="og:title" content="Shitty APIs as a Service">
+    <script src="//code.jquery.com/jquery-3.1.1.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="hero-unit">
+            <h1>Congratulations on your new shitty API!</h1>
+            <h2>Shitty APIs as a Service</h2>
+            <p><em>v1.0.0</em></p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="content" style="margin-left:50px;">
+            <h2 id="introduction">Your newly created api is accessible at <a href="http://saaas.puzzlebart.no/${apiname}">http://saaas.puzzlebart.no/${apiname}</a></h2>
+        </div>
+    </div>
+</body>
+
+</html>
+            `);
         }
     }))
 })

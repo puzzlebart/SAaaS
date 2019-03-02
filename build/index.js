@@ -104,6 +104,7 @@ app.get(["/new", "/create"], function (req, res) {
 
 app.post(["/new", "/create"], function (req, res) {
   console.log(JSON.stringify(req.body));
+  var apiname = req.body.name || "[YOUR_API_NAME]";
 
   var apiFile = _fs.default.readFileSync("./build/apis.json", "utf8");
 
@@ -114,7 +115,7 @@ app.post(["/new", "/create"], function (req, res) {
     if (err) {
       res.render("error");
     } else {
-      res.render("success");
+      res.send("\n            <!DOCTYPE html>\n<html>\n\n<head>\n    <title>Shitty APIs as a Service</title>\n    <link href=\"//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css\" rel=\"stylesheet\">\n    <meta name=\"twitter:card\" content=\"summary\">\n    <meta name=\"twitter:creator\" content=\"@Kimzter\">\n    <meta name=\"og:title\" content=\"Shitty APIs as a Service\">\n    <script src=\"//code.jquery.com/jquery-3.1.1.min.js\" type=\"text/javascript\"></script>\n</head>\n\n<body>\n    <div class=\"container\">\n        <div class=\"hero-unit\">\n            <h1>Congratulations on your new shitty API!</h1>\n            <h2>Shitty APIs as a Service</h2>\n            <p><em>v1.0.0</em></p>\n        </div>\n    </div>\n    <div class=\"container\">\n        <div class=\"content\" style=\"margin-left:50px;\">\n            <h2 id=\"introduction\">Your newly created api is accessible at <a href=\"http://saaas.puzzlebart.no/".concat(apiname, "\">http://saaas.puzzlebart.no/").concat(apiname, "</a></h2>\n        </div>\n    </div>\n</body>\n\n</html>\n            "));
     }
   });
 }); //Do lol stuff here with cheerio
