@@ -54,7 +54,8 @@ app.get(["/new", "/create"], (req, res) => res.render("new")) // newform
 // postbacks go here. it's so damn secure
 app.post(["/new", "/create"], (req, res) => {
     console.log(JSON.stringify(req.body))
-    let apiFileReadyForNewEntry = APIS.substring(0, APIS.length - 1)
+    let apiFile = fs.readFileSync("./build/apis.json", "utf8")
+    let apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1)
     fs.writeFile("./build/apis.json", `\n${apiFileReadyForNewEntry},\n${JSON.stringify(req.body)}]`, ((err, data) => { // ITS FUCKING GLORIOUS
         if (err) {
             res.render("error")

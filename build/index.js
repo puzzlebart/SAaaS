@@ -100,7 +100,10 @@ app.get(["/new", "/create"], function (req, res) {
 
 app.post(["/new", "/create"], function (req, res) {
   console.log(JSON.stringify(req.body));
-  var apiFileReadyForNewEntry = APIS.substring(0, APIS.length - 1);
+
+  var apiFile = _fs.default.readFileSync("./build/apis.json", "utf8");
+
+  var apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1);
 
   _fs.default.writeFile("./build/apis.json", "\n".concat(apiFileReadyForNewEntry, ",\n").concat(JSON.stringify(req.body), "]"), function (err, data) {
     // ITS FUCKING GLORIOUS
