@@ -2,6 +2,9 @@
   "name": "saaas",
   "version": "1.0.0",
   "description": "Shitty APIs as a Service",
+  "engines": {
+    "node": "8.12.0"
+  },
   "scripts": {
     "clean": "rm -rf build && mkdir build",
     "build-babel": "babel -d ./build ./src -s",
