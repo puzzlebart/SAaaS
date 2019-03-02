@@ -168,7 +168,7 @@ async function matchesAPI(req) {
 
 // error route
 app.get('(/*)?', (req, res) => {
-    if (req.url = "/favicon.ico") { return }
+    if (req.url = "/favicon.ico") { req.socket.end() }
     matchesAPI(req).then(matches => {
         if (matches) { executeAPI(req, res) } else {
             res.render(`error`)
