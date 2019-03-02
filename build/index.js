@@ -164,7 +164,7 @@ function _executeAPI() {
                 }, _callee);
               }));
 
-              return function (_x3) {
+              return function (_x4) {
                 return _ref.apply(this, arguments);
               };
             }())[0];
@@ -287,13 +287,90 @@ app.get('/', function (req, res) {
 app.get(_toConsumableArray(getAPIS().map(function (a) {
   return "/".concat(a.name);
 })), function (req, res) {
-  EnterpriseLevelSecurityCheck(req, res).then(function (passed) {
-    passed ? executeAPI(req, res) : res.render("error");
-  });
-}); // error route
+  // EnterpriseLevelSecurityCheck(req, res)
+  //     .then(passed => {
+  //         passed ?
+  executeAPI(req, res); //         : res.render("error")
+  // })
+});
+
+function matchesAPI(_x3) {
+  return _matchesAPI.apply(this, arguments);
+} // error route
+
+
+function _matchesAPI() {
+  _matchesAPI = _asyncToGenerator(
+  /*#__PURE__*/
+  regeneratorRuntime.mark(function _callee4(req) {
+    var allShittyApiNames, apiName, matches;
+    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            allShittyApiNames = getAPIS().map(function (a) {
+              return "/".concat(a.name);
+            });
+            apiName = req.url.substring(1).trim();
+
+            if (apiName.indexOf("?")) {
+              apiName = apiName.substring(0, apiName.indexOf("?"));
+            }
+
+            _context4.next = 5;
+            return allShittyApiNames.filter(
+            /*#__PURE__*/
+            function () {
+              var _ref2 = _asyncToGenerator(
+              /*#__PURE__*/
+              regeneratorRuntime.mark(function _callee3(a) {
+                return regeneratorRuntime.wrap(function _callee3$(_context3) {
+                  while (1) {
+                    switch (_context3.prev = _context3.next) {
+                      case 0:
+                        return _context3.abrupt("return", a.name === apiName);
+
+                      case 1:
+                      case "end":
+                        return _context3.stop();
+                    }
+                  }
+                }, _callee3);
+              }));
+
+              return function (_x5) {
+                return _ref2.apply(this, arguments);
+              };
+            }()).length;
+
+          case 5:
+            _context4.t0 = _context4.sent;
+            matches = _context4.t0 == 1;
+            console.log("api-match: ".concat(matches));
+            return _context4.abrupt("return", matches);
+
+          case 9:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+  return _matchesAPI.apply(this, arguments);
+}
 
 app.get('(/*)?', function (req, res) {
-  return res.render("error");
+  if (req.url = "/favicon.ico") {
+    return;
+  }
+
+  matchesAPI(req).then(function (matches) {
+    if (matches) {
+      executeAPI(req, res);
+    } else {
+      res.render("error");
+    }
+  });
 }); // D'oh!
 
 app.listen(process.env.PORT || '3000', function () {

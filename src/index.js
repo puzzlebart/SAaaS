@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded b
 // app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
 // const APIS = JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
-const getAPIS = () => JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
+let getAPIS = () => JSON.parse(fs.readFileSync("./build/apis.json", "utf8"))
 
 
 
@@ -149,13 +149,31 @@ app.get('/', (req, res) => { res.render("index") });
 
 // SHITTY API ENDPOINT TRIGGER 
 app.get([...getAPIS().map(a => `/${a.name}`)], (req, res) => {
-    EnterpriseLevelSecurityCheck(req, res)
-        .then(passed => {
-            passed ? executeAPI(req, res) : res.render("error")
-        })
+    // EnterpriseLevelSecurityCheck(req, res)
+    //     .then(passed => {
+    //         passed ?
+    executeAPI(req, res)
+    //         : res.render("error")
+    // })
 })
 
+async function matchesAPI(req) {
+    let allShittyApiNames = getAPIS().map(a => `/${a.name}`)
+    let apiName = req.url.substring(1).trim();
+    if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) }
+    let matches = await allShittyApiNames.filter(async (a) => a.name === apiName).length == 1
+    console.log(`api-match: ${matches}`)
+    return matches
+}
+
 // error route
-app.get('(/*)?', (req, res) => res.render(`error`)) // D'oh!
+app.get('(/*)?', (req, res) => {
+    if (req.url = "/favicon.ico") { return }
+    matchesAPI(req).then(matches => {
+        if (matches) { executeAPI(req, res) } else {
+            res.render(`error`)
+        }
+    })
+}) // D'oh!
 
 app.listen(process.env.PORT || '3000', () => console.log(`running on port ${process.env.PORT || '3000'}`))

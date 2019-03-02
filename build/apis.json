@@ -1,6 +1,8 @@
+
 [{
     "name":"vg",
     "description":"Gets all headers from VG.no",
     "url":"https://vg.no",
     "selectors":".article-content"
-}]
+},
+{"name":"myfirstapi","description":"Its pretty neat. Shitty, but neat","url":"https://db.no","selectors":"h1,h2"}]
