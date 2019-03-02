@@ -157,12 +157,14 @@ app.get([...getAPIS().map(a => `/${a.name}`)], (req, res) => {
     // })
 })
 
-function matchesAPI(req) {
+function matchesAPI(req,res) {
     return new Promise((resolve, reject) => {
         let allShittyApiNames = getAPIS().map(a => `/${a.name}`)
+        console.log(`AVAILABLE APIS: ${allShittyApiNames}`)
         let apiName = req.url.substring(1).trim();
+        console.log(`TESTING FOR: ${apiName}`)
         if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) }
-        let matches = allShittyApiNames.filter((a) => a.name === apiName).length == 1;
+        let matches = allShittyApiNames.filter((a) => a.name === apiName).length>0;
         console.log(`api-match: ${matches}`)
         resolve(matches)
     })
@@ -174,7 +176,7 @@ app.get("/favicon.ico", (req, res) => {
 
 // error route
 app.get('(/*)?', (req, res) => {
-    matchesAPI(req).then(matches => {
+    matchesAPI(req,res).then(matches => {
         if (matches) { executeAPI(req, res) } else {
             res.render(`error`)
         }
