@@ -1,5 +1,9 @@
 // @ts-ignore
 import APIS from "./apis.json";
+// @ts-ignore
+import sampleAPIS from "./apis.sample.json";
+import bodyParser from "body-parser";
+import fs from "fs";
 import "@babel/polyfill";
 import express from 'express'; // framework, yo
 // import cheerio from 'cheerio'; // IM TRYING JSOM MOM
@@ -10,6 +14,8 @@ import axios from "axios";
 if (process.platform === "darwin") { require("dotenv").config() } // enterprise-grade MacOS-detection
 const app = express() // express app instance
 app.set('view engine', 'ejs')
+app.use(bodyParser.json());       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded bodies 
 
 
 
@@ -35,10 +41,30 @@ app.get('/doh', (req, res) => { res.json({ message: "D'oh!" }) }) // DaaS - D´o
 
 
 // GET a named API by title or whatever
-app.get('/get', (req, res) => { res.status(501); res.render("error") }) // D'oh!
+app.get('/get', (req, res) => {
+    if (!req.query.name) { res.json(APIS) } // yeah so no query, you get all, you fool! use /LIST
+}) // D'oh!
+
+
 
 // list all created apis
 app.get("/list", (req, res) => res.json(APIS))
+app.get("/success", (req, res) => res.render("success")) // newform
+app.get(["/new", "/create"], (req, res) => res.render("new")) // newform
+// postbacks go here. it's so damn secure
+app.post(["/new", "/create"], (req, res) => {
+    console.log(JSON.stringify(req.body))
+    let apiFile = fs.readFileSync("./apis.json", "utf8")
+    let apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1)
+    fs.writeFile("./apis.json", `\n${apiFileReadyForNewEntry},\n${JSON.stringify(req.body)}]`, ((err, data) => { // ITS FUCKING GLORIOUS
+        if (err) {
+            res.render("error")
+        } else {
+            res.render("success");
+        }
+    }))
+})
+
 
 
 //Do lol stuff here with cheerio
@@ -54,7 +80,7 @@ async function executeAPI(req, res) {
         const dom = new JSDOM(data)
         let document = dom.window.document; // ah it's so familiar
 
-        // THIS IS WHERE ALL THE SHITTY MAGIC HAPPENS
+        // ----------------- THIS IS WHERE ALL THE SHITTY MAGIC HAPPENS ---------------------------------------------------
 
         console.log(`SELECTORS: ${shittyApiDefinition.selectors}`)
         let allTheThings = document.querySelectorAll(shittyApiDefinition.selectors);
@@ -106,18 +132,19 @@ function EnterpriseLevelSecurityCheck(req, res) {
 // Stupid sexy jslint
 const capitalize = (s) => { if (typeof s !== 'string') return ''; return s.charAt(0).toUpperCase() + s.slice(1) }
 
+// NOT IMPLEMENTED
+app.get("/501", (req, res) => { res.status(501); res.render("error") })
 
 // FRONT PAGE
 app.get('/', (req, res) => { res.render("index") });
 
-const matchesAnAPI = (apiName) => {
-    console.log(`checking whether the "${apiName}" api exists`)
-    let matches = APIS.filter(a => a.name === apiName).length == 1
-    console.log(`api-match: ${matches}`)
-    return matches
-}
+// SHITTY API ENDPOINT TRIGGER 
+app.get([...APIS.map(a => `/${a.name}`)], (req, res) => {
+    EnterpriseLevelSecurityCheck(req, res)
+        .then(passed => { passed ? executeAPI(req, res) : res.render("error") })
+})
 
 // error route
-app.get('(/*)?', (req, res) => matchesAnAPI(req.url.substring(1)) ? executeAPI(req, res) : res.render(`error`)) // D'oh!
+app.get('(/*)?', (req, res) => res.render(`error`)) // D'oh!
 
 app.listen(process.env.PORT || '3000', () => console.log(`running on port ${process.env.PORT || '3000'}`))

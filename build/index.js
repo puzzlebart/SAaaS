@@ -2,6 +2,12 @@
 
 var _apis = _interopRequireDefault(require("./apis.json"));
 
+var _apisSample = _interopRequireDefault(require("./apis.sample.json"));
+
+var _bodyParser = _interopRequireDefault(require("body-parser"));
+
+var _fs = _interopRequireDefault(require("fs"));
+
 require("@babel/polyfill");
 
 var _express = _interopRequireDefault(require("express"));
@@ -33,7 +39,13 @@ if (process.platform === "darwin") {
 
 var app = (0, _express.default)(); // express app instance
 
-app.set('view engine', 'ejs'); //CORS
+app.set('view engine', 'ejs');
+app.use(_bodyParser.default.json()); // to support JSON-encoded bodies
+
+app.use(_bodyParser.default.urlencoded({
+  extended: true
+})); // to support URL-encoded bodies 
+//CORS
 
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*"); // Remember to have apikey here, else our enterprise-grade authorization-system will fail
@@ -67,13 +79,40 @@ app.get('/doh', function (req, res) {
 // GET a named API by title or whatever
 
 app.get('/get', function (req, res) {
-  res.status(501);
-  res.render("error");
+  if (!req.query.name) {
+    res.json(_apis.default);
+  } // yeah so no query, you get all, you fool! use /LIST
+
 }); // D'oh!
 // list all created apis
 
 app.get("/list", function (req, res) {
   return res.json(_apis.default);
+});
+app.get("/success", function (req, res) {
+  return res.render("success");
+}); // newform
+
+app.get(["/new", "/create"], function (req, res) {
+  return res.render("new");
+}); // newform
+// postbacks go here. it's so damn secure
+
+app.post(["/new", "/create"], function (req, res) {
+  console.log(JSON.stringify(req.body));
+
+  var apiFile = _fs.default.readFileSync("./apis.json", "utf8");
+
+  var apiFileReadyForNewEntry = apiFile.substring(0, apiFile.length - 1);
+
+  _fs.default.writeFile("./apis.json", "\n".concat(apiFileReadyForNewEntry, ",\n").concat(JSON.stringify(req.body), "]"), function (err, data) {
+    // ITS FUCKING GLORIOUS
+    if (err) {
+      res.render("error");
+    } else {
+      res.render("success");
+    }
+  });
 }); //Do lol stuff here with cheerio
 
 function executeAPI(_x, _x2) {
@@ -104,7 +143,7 @@ function _executeAPI() {
               var data = r.data;
               var dom = new JSDOM(data);
               var document = dom.window.document; // ah it's so familiar
-              // THIS IS WHERE ALL THE SHITTY MAGIC HAPPENS
+              // ----------------- THIS IS WHERE ALL THE SHITTY MAGIC HAPPENS ---------------------------------------------------
 
               console.log("SELECTORS: ".concat(shittyApiDefinition.selectors));
               var allTheThings = document.querySelectorAll(shittyApiDefinition.selectors);
@@ -191,25 +230,28 @@ function EnterpriseLevelSecurityCheck(req, res) {
 var capitalize = function capitalize(s) {
   if (typeof s !== 'string') return '';
   return s.charAt(0).toUpperCase() + s.slice(1);
-}; // FRONT PAGE
+}; // NOT IMPLEMENTED
 
+
+app.get("/501", function (req, res) {
+  res.status(501);
+  res.render("error");
+}); // FRONT PAGE
 
 app.get('/', function (req, res) {
   res.render("index");
-});
+}); // SHITTY API ENDPOINT TRIGGER 
 
-var matchesAnAPI = function matchesAnAPI(apiName) {
-  console.log("checking whether the \"".concat(apiName, "\" api exists"));
-  var matches = _apis.default.filter(function (a) {
-    return a.name === apiName;
-  }).length == 1;
-  console.log("api-match: ".concat(matches));
-  return matches;
-}; // error route
-
+app.get(_toConsumableArray(_apis.default.map(function (a) {
+  return "/".concat(a.name);
+})), function (req, res) {
+  EnterpriseLevelSecurityCheck(req, res).then(function (passed) {
+    passed ? executeAPI(req, res) : res.render("error");
+  });
+}); // error route
 
 app.get('(/*)?', function (req, res) {
-  return matchesAnAPI(req.url.substring(1)) ? executeAPI(req, res) : res.render("error");
+  return res.render("error");
 }); // D'oh!
 
 app.listen(process.env.PORT || '3000', function () {
