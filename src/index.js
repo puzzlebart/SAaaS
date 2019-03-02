@@ -32,7 +32,7 @@ app.use(function (req, res, next) {
 
 // MICKEY MOUSE ENTERPRISE-GRADE SECURITY AS A SERVICE
 const superSecretApiKeys = process.env.APIKEYS.split(",")
-const doEnterpriseLevelSecurityCheck = false;
+const doEnterpriseLevelSecurityCheck = true;
 // ENTERPRISE GRADE RANDOMIZATION ENGINE
 const randomize = (min, max) => Math.round((Math.random() * (max - min) + min))
 
@@ -70,9 +70,17 @@ app.post(["/new", "/create"], (req, res) => {
 
 //Do lol stuff here with cheerio
 async function executeAPI(req, res) {
-    console.log(`EXECUTEAPI ${req.url.substring(1)}`)
+    console.log(`----------- EXECUTEAPI ${req.url.substring(1)} -----------`)
+    let allShittyAPIs = getAPIS();
     let apiName = req.url.substring(1).trim();
-    let shittyApiDefinition = getAPIS().filter(a => a.name === apiName)[0] // we already know it exists 'cause we checked right
+    if (apiName.indexOf("?")) { apiName = apiName.substring(0, apiName.indexOf("?")) } // HAHAHA SO BAD
+    console.log(`api definitions: ${JSON.stringify(allShittyAPIs)}`)
+    let shittyApiDefinition = await allShittyAPIs.filter(async (a) => a.name == apiName)[0]; // we already know it exists 'cause we checked right
+    console.log(`Found an api definition: ${JSON.stringify(shittyApiDefinition)}`)
+    if (!shittyApiDefinition) {
+        console.log("no shitty api definition...")
+        res.render("error")
+    }
     console.log(`THIS IS THE SHITTY API DEFINITION T.I.H.I.`)
     console.log(JSON.stringify(shittyApiDefinition))
     const url = shittyApiDefinition.url;

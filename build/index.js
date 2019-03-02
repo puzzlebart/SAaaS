@@ -127,17 +127,57 @@ function executeAPI(_x, _x2) {
 function _executeAPI() {
   _executeAPI = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(req, res) {
-    var apiName, shittyApiDefinition, url;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
+  regeneratorRuntime.mark(function _callee2(req, res) {
+    var allShittyAPIs, apiName, shittyApiDefinition, url;
+    return regeneratorRuntime.wrap(function _callee2$(_context2) {
       while (1) {
-        switch (_context.prev = _context.next) {
+        switch (_context2.prev = _context2.next) {
           case 0:
-            console.log("EXECUTEAPI ".concat(req.url.substring(1)));
+            console.log("----------- EXECUTEAPI ".concat(req.url.substring(1), " -----------"));
+            allShittyAPIs = getAPIS();
             apiName = req.url.substring(1).trim();
-            shittyApiDefinition = getAPIS().filter(function (a) {
-              return a.name === apiName;
-            })[0]; // we already know it exists 'cause we checked right
+
+            if (apiName.indexOf("?")) {
+              apiName = apiName.substring(0, apiName.indexOf("?"));
+            } // HAHAHA SO BAD
+
+
+            console.log("api definitions: ".concat(JSON.stringify(allShittyAPIs)));
+            _context2.next = 7;
+            return allShittyAPIs.filter(
+            /*#__PURE__*/
+            function () {
+              var _ref = _asyncToGenerator(
+              /*#__PURE__*/
+              regeneratorRuntime.mark(function _callee(a) {
+                return regeneratorRuntime.wrap(function _callee$(_context) {
+                  while (1) {
+                    switch (_context.prev = _context.next) {
+                      case 0:
+                        return _context.abrupt("return", a.name == apiName);
+
+                      case 1:
+                      case "end":
+                        return _context.stop();
+                    }
+                  }
+                }, _callee);
+              }));
+
+              return function (_x3) {
+                return _ref.apply(this, arguments);
+              };
+            }())[0];
+
+          case 7:
+            shittyApiDefinition = _context2.sent;
+            // we already know it exists 'cause we checked right
+            console.log("Found an api definition: ".concat(JSON.stringify(shittyApiDefinition)));
+
+            if (!shittyApiDefinition) {
+              console.log("no shitty api definition...");
+              res.render("error");
+            }
 
             console.log("THIS IS THE SHITTY API DEFINITION T.I.H.I.");
             console.log(JSON.stringify(shittyApiDefinition));
@@ -168,12 +208,12 @@ function _executeAPI() {
               }
             });
 
-          case 7:
+          case 14:
           case "end":
-            return _context.stop();
+            return _context2.stop();
         }
       }
-    }, _callee);
+    }, _callee2);
   }));
   return _executeAPI.apply(this, arguments);
 }
