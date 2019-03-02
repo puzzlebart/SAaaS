@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));  // to support URL-encoded b
 // app.use(express.static(__dirname + '/public')); // because paths is a PITA
 app.use(express.static("public")); // because paths is a PITA
 // @ts-ignore
-import APIS from "./apis.json";
+import APIS from "./public/apis.json";
 
 
 
